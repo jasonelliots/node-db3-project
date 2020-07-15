@@ -34,15 +34,20 @@ function findById(id){
 //     -   This array should include the `scheme_name` _not_ the `scheme_id`.
 
 function findSteps(id){
+
+// select schemes.scheme_name, steps.step_number, steps.instructions
+// from schemes
+// join steps on steps.scheme_id = schemes.id
+
     return db("schemes")
-        .join("steps", "schemes.id", "steps.scheme_id")
-        .select("schemes.scheme_name", "steps.steps_number", "steps.instructions")
-        .then(schemes => {
-            res.status(200).json({ data: schemes });
-        })
-        .catch(error => {
-            res.status(500).json({ error: error.message });
-        });
+        .join("steps", "steps.scheme_id", "schemes.id")
+        .select("schemes.scheme_name", "steps.step_number", "steps.instructions")
+        // .then(schemes => {
+        //     res.status(200).json({ data: schemes });
+        // })
+        // .catch(error => {
+        //     res.status(500).json({ error: error.message });
+        // });
 }
 
 // -   `add(scheme)`:
@@ -78,8 +83,13 @@ function update(changes, id){
 //     -   Resolves to `null` on an invalid id.
 //     -   (Hint: Only worry about removing the `scheme`. The database is configured to automatically remove all associated steps.)
 
-function remove(id){
+async function remove(id){
+    const found = await findById(id)
     return db("schemes")
         .where({ id })
         .delete()
+        .then(() => {
+            return found  
+        })
 }
+
